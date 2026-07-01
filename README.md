@@ -6,9 +6,9 @@ Clojure** — every namespace is `.cljc`, designed for
 well as the JVM. The desktop itself is an injected host capability;
 the action history is persisted through a **Datomic API**.
 
-Built on [langgraph-clj](https://github.com/com-junkawasaki/langgraph-clj)
-/ [langchain-clj](https://github.com/com-junkawasaki/langchain-clj).
-Sibling of [browser-use-clj](https://github.com/com-junkawasaki/browser-use-clj).
+Built on [langgraph-clj](https://github.com/kotoba-lang/langgraph)
+/ [langchain-clj](https://github.com/kotoba-lang/langchain).
+Sibling of [browser-use-clj](https://github.com/kotoba-lang/browser-use).
 
 ```
 src/computeruse/

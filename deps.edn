@@ -1,19 +1,19 @@
 {:paths ["src"]
  ;; Built on langgraph-clj (graph agent loop) which brings langchain-clj
  ;; (ChatModel / tools / Datomic-API store). Both are zero-third-party-dep .cljc.
- :deps {io.github.com-junkawasaki/langgraph-clj
-        {:git/tag "v0.2.0" :git/sha "133740f"}}
+ :deps {io.github.kotoba-lang/langgraph
+        {:local/root "../langgraph"}}
  :aliases
  {:test {:extra-paths ["test"]
          :extra-deps {io.github.cognitect-labs/test-runner
                       {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
          :main-opts ["-m" "cognitect.test-runner"]
          :exec-fn cognitect.test-runner.api/test}
-  ;; local checkouts for workspace development (orgs/com-junkawasaki/*)
-  :dev {:override-deps {io.github.com-junkawasaki/langgraph-clj
-                        {:local/root "../langgraph-clj"}
-                        io.github.com-junkawasaki/langchain-clj
-                        {:local/root "../langchain-clj"}}}
+  ;; local checkouts for workspace development (orgs/kotoba-lang/*)
+  :dev {:override-deps {io.github.kotoba-lang/langgraph
+                        {:local/root "../langgraph"}
+                        io.github.kotoba-lang/langchain
+                        {:local/root "../langchain"}}}
   ;; drive a real desktop with a local/remote model (Ollama Gemma 4 E4B QAT
   ;; by default). `clojure -M:gemma -m vultr-ip-allow 220.146.252.121 32`
   :gemma {:extra-paths ["examples"]
