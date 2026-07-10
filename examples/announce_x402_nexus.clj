@@ -3,10 +3,29 @@
   drafts for gftdcojp/nexus-x402 + kotoba-lang/x402-directory, via
   computer-use on the user's real, already-logged-in desktop browser.
 
-     ANTHROPIC_API_KEY=… clojure -M:examples -m announce-x402-nexus hn
-     ANTHROPIC_API_KEY=… clojure -M:examples -m announce-x402-nexus reddit-clojure
-     ANTHROPIC_API_KEY=… clojure -M:examples -m announce-x402-nexus reddit-ethereum
-     ANTHROPIC_API_KEY=… clojure -M:examples -m announce-x402-nexus base https://discord.com/channels/<server>/<channel>
+     clojure -M:examples -m announce-x402-nexus hn
+     clojure -M:examples -m announce-x402-nexus reddit-clojure
+     clojure -M:examples -m announce-x402-nexus reddit-ethereum
+     clojure -M:examples -m announce-x402-nexus base https://discord.com/channels/<server>/<channel>
+
+  Owner instruction (2026-07-10): no Anthropic API, gftdcojp/cloud-murakumo
+  only. Defaults to LLM=murakumo (jvm-host/make-model \"murakumo\") --
+  murakumo.cloud's OpenAI-compatible gateway, no API key needed. No
+  ANTHROPIC_API_KEY is read anywhere in this file.
+
+  IMPORTANT CAVEAT, not fixed here (see jvm_host.clj's make-model
+  docstring for the full finding): murakumo's currently-served model has
+  no vision support (rejects image_url content with a missing-mmproj
+  error), and this whole task is screenshot-driven -- so running this
+  against the murakumo default will very likely stall out and call `done`
+  success=false the first time the agent needs to actually see the
+  screen, not because the wiring is wrong but because there is currently
+  no vision-capable model behind murakumo.cloud/api/v1/chat/completions.
+  This will start working automatically once murakumo's fleet serves a
+  vision-capable model at that same OpenAI-compatible endpoint -- no
+  change needed here when that happens. Override with e.g.
+  `LLM=ollama OLLAMA_MODEL=<a vision-capable local model>` in the
+  meantime if you need this to actually run before then.
 
   Content is embedded from `kotoba-lang/x402-directory/docs/announcements.md`
   (2026-07-10 drafts) — not fetched live, so what actually gets typed is
@@ -209,7 +228,7 @@
                               {}))))
         conn (db/create-conn agent/log-schema)
         {:keys [result done steps]}
-        (agent/run {:model (host/make-model)
+        (agent/run {:model (host/make-model "murakumo")
                     :computer (macos/macos-computer)
                     :system system-prompt
                     :task (task-fn data)
