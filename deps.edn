@@ -1,8 +1,20 @@
 {:paths ["src"]
  ;; Built on langgraph (graph agent loop) which brings langchain
  ;; (ChatModel / tools / Datomic-API store). Both are zero-third-party-dep .cljc.
+ ;; Was pinned {:git/tag "v0.2.0" :sha "133740f..."} -- `:sha` (not
+ ;; `:git/sha`) is not a real tools.deps git-coord key, so it was silently
+ ;; dropped and resolution fell through to just `:git/tag "v0.2.0"`, which
+ ;; is langgraph's pre-org-rename commit (still depends on the OLD
+ ;; io.github.com-junkawasaki/langchain-clj coordinate, which shadows
+ ;; io.github.kotoba-lang/langchain's `langchain.model` namespace on the
+ ;; classpath and drops `openai-model` -- every example in this repo
+ ;; failed to load with `No such var: model/openai-model` as a result,
+ ;; not just new ones). Pinned past langgraph's org-rename
+ ;; (kotoba-lang/langgraph#3) to a commit that depends on
+ ;; io.github.kotoba-lang/langchain directly; no v0.2.x tag has this yet
+ ;; (newest tag v0.2.1 predates the rename), hence :git/sha only.
  :deps {io.github.kotoba-lang/langgraph
-        {:git/tag "v0.2.0" :sha "133740f3df2f4aa57e9e98b32f70e2483c025a7e"}}
+        {:git/sha "a332a770a0d2b5193f81b54483bb954fb29ef8d7"}}
  :aliases
  {:test {:extra-paths ["test"]
          :extra-deps {io.github.cognitect-labs/test-runner

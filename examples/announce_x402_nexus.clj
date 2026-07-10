@@ -26,23 +26,7 @@
   the target platform (HN, Reddit, or the Base community's Discord/forum)
   — this script does not attempt any login flow. If a login/auth page
   appears instead of the expected form, the agent is instructed to stop
-  with success=false rather than guess at credentials it doesn't have.
-
-  KNOWN GAP (2026-07-10, not introduced by this file): this repo's own
-  examples/jvm_host.clj currently fails to load --
-  `No such var: model/openai-model` -- because the top-level
-  io.github.kotoba-lang/langgraph dep transitively pulls the OLD
-  io.github.com-junkawasaki/langchain-clj coordinate (which doesn't
-  define openai-model), and that shadows io.github.kotoba-lang/langchain
-  (which does) on the classpath -- confirmed by reproducing the identical
-  error against the pre-existing vultr_ip_allow.clj, not just this file.
-  Matches superproject CLAUDE.md's documented in-progress migration
-  (ADR-2606302300: 汎用基盤 -clj も最終的に kotoba-lang へ全移行). Not
-  fixed here (cross-repo dependency-graph surgery, out of scope for an
-  announcement script) -- this file is written correctly against the
-  documented computeruse.agent/computeruse.macos API and parses/lints
-  clean (0 errors); it will run once langgraph's own deps.edn points at
-  kotoba-lang/langchain instead of the old coordinate."
+  with success=false rather than guess at credentials it doesn't have."
   (:require [computeruse.macos :as macos]
             [computeruse.agent :as agent]
             [langchain.db :as db]
