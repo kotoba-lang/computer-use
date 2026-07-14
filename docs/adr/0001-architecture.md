@@ -48,6 +48,20 @@ Datalog クエリ。チェックポイントは langgraph-clj の
 deps は langgraph-clj のみ(langchain-clj が transitive)。
 browser-use-clj と対になる sibling ライブラリ。
 
+### 5. Human-in-the-loop 承認
+
+外部アカウント作成・規約同意などの不可逆操作は、共有リポジトリ
+`kotoba-lang/hil` の `IHumanApproval` を通す。`computeruse.hil` が
+`request_human_approval` tool として agent graph に追加し、macOS では
+`display dialog` の `Approve` / `Reject` を使う。`Reject` が既定で、
+通常は入力欄を表示しない。`input-label` は非機密の短い入力に限り、
+credential 名を含むラベルは共有契約で拒否する。
+
+実機 macOS adapter は `:expected-frontmost-app` を指定できる。NGC の例は
+Chrome を明示的に foreground にしてから操作し、別アプリが前面なら即時に
+停止する。これにより、agent 起動元の Terminal や別 desktop への誤操作を
+防ぐ。
+
 ## 非スコープ (v0.1)
 
 - 実デスクトップドライバ・サンドボックス(Docker/VNC 相当)— ホスト注入

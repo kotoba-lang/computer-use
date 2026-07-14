@@ -150,6 +150,23 @@ data never leaves the machine; `examples/jvm_host.clj` provides the
 JVM host capabilities and the `LLM=ollama|gemini|anthropic` switch
 (gemini = Gemini's OpenAI-compatible endpoint with `GEMINI_API_KEY`).
 
+`examples/ngc_free_org.clj` prepares the frontmost browser for a free
+individual NVIDIA NGC organization registration:
+
+```sh
+clojure -M:dev:examples -m ngc-free-org
+```
+
+The `computeruse.ngc/free-registration-system-prompt` is intended for an
+AI-driven inspection loop. It prohibits credential entry, MFA, terms
+entry, MFA, terms acceptance, and account creation until it has called the
+shared `request_human_approval` tool. The macOS host presents this request as a
+native alert containing only the summary, action, and external impact:
+
+```sh
+LLM=ollama clojure -M:examples -m ngc-free-org-agent
+```
+
 ```sh
 SUMITCLUB_VAULT_ITEM=sumitclub \
   clojure -M:dev:examples -e "(require 'sumitclub-meisai) (sumitclub-meisai/-main)"

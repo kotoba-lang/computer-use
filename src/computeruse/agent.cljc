@@ -15,7 +15,8 @@
             [langchain.message :as msg]
             [langchain.tool :as tool]
             [langchain.db :as db]
-            [computeruse.tool :as ctool]))
+            [computeruse.tool :as ctool]
+            [computeruse.hil :as hil]))
 
 (def default-system-prompt
   (str "You are a computer-use agent controlling a desktop via the `computer` tool.\n"
@@ -59,6 +60,7 @@
   opts: {:model ChatModel  :computer IComputer
          :display {:width 1280 :height 800}
          :vault IVault             ; optional — enables `type_secret` credential injection
+         :approval-prompt IHumanApproval ; optional — enables request_human_approval
          :tools [tool…]            ; extra tools alongside `computer`
          :system \"…\"
          :history-conn conn        ; optional — action log datoms
@@ -66,12 +68,13 @@
          :db-api langchain.db/api
          :max-steps 25
          :compile-opts {…}}"
-  [{:keys [model computer display vault tools system history-conn session-id db-api
+  [{:keys [model computer display vault approval-prompt tools system history-conn session-id db-api
            max-steps compile-opts]
     :or {db-api db/api max-steps 25 session-id "default"}}]
-  (let [all-tools (into [(ctool/computer-tool computer (assoc display :vault vault))
-                         done-tool]
-                        tools)
+  (let [all-tools (cond-> [(ctool/computer-tool computer (assoc display :vault vault))
+                           done-tool]
+                    approval-prompt (conj (hil/approval-tool approval-prompt))
+                    true (into tools))
         step-counter (atom 0)
         call-model
         (fn [{:keys [messages]}]

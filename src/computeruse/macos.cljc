@@ -19,7 +19,8 @@
   agent run on top of it must never type secrets (see
   examples/vultr_ip_allow.clj for the guardrail prompt)."
   (:require [computeruse.computer :as c]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [hil.core :as hil])
   #?(:clj (:import [java.util Base64]
                    [java.nio.file Files Paths])))
 
@@ -42,6 +43,26 @@
                 "tell application \"Finder\" to get bounds of window of desktop")
         [_ _ w h] (map #(Long/parseLong (str/trim %)) (str/split out #","))]
     [w h]))
+
+(declare escape-as)
+
+(defn frontmost-application
+  "Name of the application currently receiving keyboard and mouse input."
+  []
+  (str/trim
+   (sh "osascript" "-e"
+       "tell application \"System Events\" to get name of first application process whose frontmost is true")))
+
+(defn activate-application!
+  "Bring an explicitly named app to the foreground before desktop control."
+  [app-name]
+  (sh "osascript" "-e" (str "tell application \"" (escape-as app-name) "\" to activate"))
+  app-name)
+
+(defn- require-frontmost! [expected-app]
+  (when (and expected-app (not= expected-app (frontmost-application)))
+    (throw (ex-info "desktop target is not frontmost"
+                    {:expected expected-app :actual (frontmost-application)}))))
 
 (defn- png-size [path]
   (let [out (sh "sips" "-g" "pixelWidth" "-g" "pixelHeight" path)
@@ -87,13 +108,15 @@
 
   Returns the IComputer directly (no wrapping state — the desktop is
   the state)."
-  [& [{:keys [model-width] :or {model-width 1280}}]]
+  [& [{:keys [model-width expected-frontmost-app] :or {model-width 1280}}]]
   (let [scale (atom nil)             ; [points-per-model-px-x points-per-model-px-y]
         to-points (fn [x y]
                     (let [[sx sy] (or @scale [1 1])]
-                      [(long (* x sx)) (long (* y sy))]))]
+                      [(long (* x sx)) (long (* y sy))]))
+        target! #(require-frontmost! expected-frontmost-app)]
     (reify c/IComputer
       (-screenshot [_]
+        (target!)
         (let [path (str "/tmp/cuse-" (System/nanoTime) ".png")]
           (sh "screencapture" "-x" "-t" "png" path)
           (sh "sips" "-Z" (str model-width) path)
@@ -104,24 +127,29 @@
               :source {:type "base64" :media_type "image/png"
                        :data (b64-file path)}}])))
       (-key! [_ combo]
+        (target!)
         (sh "osascript" "-e" (key-script combo))
         (str "Pressed " combo))
       (-type! [_ text]
+        (target!)
         (sh "osascript" "-e"
             (str "tell application \"System Events\" to keystroke \""
                  (escape-as text) "\""))
         (str "Typed " (pr-str text)))
       (-mouse-move! [_ x y]
+        (target!)
         (let [[px py] (to-points x y)]
           (sh "cliclick" (str "m:" px "," py))
           (str "Moved to [" px " " py "]")))
       (-click! [_ button x y]
+        (target!)
         (let [[px py] (to-points x y)
               cmd (case button
                     :left "c" :right "rc" :double "dc" :middle "c")]
           (sh "cliclick" (str cmd ":" px "," py))
           (str (name button) " click at [" px " " py "]")))
       (-scroll! [_ x y direction amount]
+        (target!)
         ;; cliclick has no wheel verb — move then PageUp/PageDown, which is
         ;; what browser/portal pages need in practice.
         (let [[px py] (to-points x y)]
@@ -131,8 +159,32 @@
                 (key-script (if (= direction :up) "pageup" "pagedown"))))
           (str "Scrolled " (name direction))))
       (-cursor-position [_]
+        (target!)
         (let [out (sh "cliclick" "p")
               [x y] (map #(Long/parseLong %) (re-seq #"\d+" out))]
           [x y])))))
+
+(defn macos-approval-prompt
+  "Native alert implementation for hil/IHumanApproval. It displays only the
+  compact request contract and blocks until the account holder chooses.
+  `Approve` is intentionally not the default button."
+  []
+  (reify hil/IHumanApproval
+    (-request-approval! [_ request]
+      (let [message (str/replace (hil/alert-text request) #"\n+" " ")
+            input-label (:input-label request)
+            script (str "display dialog \"" (escape-as message)
+                        "\"" (when input-label " default answer \"\"")
+                        " with title \"" (escape-as (:title request))
+                        "\" buttons {\"Reject\", \"Approve\"} default button \"Reject\" cancel button \"Reject\"")]
+        (try
+          (let [out (sh "osascript" "-e" script)]
+            (if (str/includes? out "button returned:Approve")
+              (if input-label
+                {:decision :approved
+                 :input (some-> (re-find #"text returned:(.*)" out) second str/trim)}
+                :approved)
+              :rejected))
+          (catch Exception _ :dismissed))))))
 
 ))
