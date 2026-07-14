@@ -157,18 +157,18 @@ SUMITCLUB_VAULT_ITEM=sumitclub \
 
 ```sh
 ANTHROPIC_API_KEY=… clojure -Sdeps '{:paths ["src" "examples"]
-                 :deps {io.github.com-junkawasaki/langgraph-clj
-                        {:git/tag "v0.2.0" :git/sha "133740f"}}}' \
+                 :deps {io.github.kotoba-lang/langgraph
+                        {:git/sha "a332a770a0d2b5193f81b54483bb954fb29ef8d7"}}}' \
         -M -e "(require 'vultr-ip-allow) (vultr-ip-allow/-main \"203.0.113.7\")"
 ```
 
 ## Tests / example
 
 ```sh
-clojure -M:test     # 4 tests, 20 assertions
+clojure -M:test     # 13 tests, 60 assertions
 clojure -Sdeps '{:paths ["src" "examples"]
-                 :deps {io.github.com-junkawasaki/langgraph-clj
-                        {:git/tag "v0.2.0" :git/sha "133740f"}}}' \
+                 :deps {io.github.kotoba-lang/langgraph
+                        {:git/sha "a332a770a0d2b5193f81b54483bb954fb29ef8d7"}}}' \
         -M -e "(require 'desktop-agent) (desktop-agent/-main)"
 ```
 

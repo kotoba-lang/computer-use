@@ -43,33 +43,71 @@
 
 (def default-ollama-model "hf.co/unsloth/gemma-4-E4B-it-qat-GGUF:UD-Q4_K_XL")
 
+(def default-murakumo-model "qwen-agentworld-35b-a3b")
+
 (defn make-model
-  "ChatModel from env (LLM=ollama|gemini|anthropic; default local Ollama).
-  Reuses this host's curl :http-fn + data.json caps. Carried over from
-  reconcile PR #3 — also unblocks examples/epo_ops_register.clj, which
-  already calls host/make-model."
-  []
-  (case (or (System/getenv "LLM") "ollama")
-    "ollama"
-    (model/openai-model
-     (merge host-caps
-            {:url (or (System/getenv "OLLAMA_URL")
-                      "http://localhost:11434/v1/chat/completions")
-             :model (or (System/getenv "OLLAMA_MODEL") default-ollama-model)}))
+  "ChatModel from env (LLM=ollama|gemini|anthropic|murakumo; default local
+  Ollama). Reuses this host's curl :http-fn + data.json caps. Carried over
+  from reconcile PR #3 — also unblocks examples/epo_ops_register.clj,
+  which already calls host/make-model.
 
-    "gemini"
-    (model/openai-model
-     (merge host-caps
-            {:url "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
-             :model (or (System/getenv "GEMINI_MODEL") "gemini-2.5-flash")
-             :api-key (or (System/getenv "GEMINI_API_KEY")
-                          (throw (ex-info "GEMINI_API_KEY is required for LLM=gemini" {})))}))
+  LLM=murakumo talks to gftdcojp/cloud-murakumo's self-hosted fleet via
+  its OpenAI-compatible gateway (murakumo.cloud/api/v1/chat/completions,
+  README's \"API gateway\" section) — no API key, first-party/open
+  endpoint (verified live 2026-07-10: GET /api/v1/models and a real
+  chat/completions round-trip both 200 with no auth). Its Anthropic-
+  compatible /v1/messages path exists in the same gateway but returned
+  502 \"murakumo inference upstream is not configured for anthropic\"
+  as of that same check — use the OpenAI-compatible path (this fn does),
+  not model/anthropic-model, until that upstream is wired.
 
-    "anthropic"
-    (model/anthropic-model
-     (cond-> (merge host-caps
-                    {:api-key (or (System/getenv "ANTHROPIC_API_KEY")
-                                  (throw (ex-info "ANTHROPIC_API_KEY is required for LLM=anthropic" {})))})
-       (System/getenv "ANTHROPIC_MODEL") (assoc :model (System/getenv "ANTHROPIC_MODEL"))))
+  KNOWN LIMITATION (2026-07-10, not fixed here — a fleet/model-serving
+  change, not a client-side one): the one model murakumo's /v1/models
+  currently lists (default-murakumo-model) rejected an image_url content
+  block with `500 image input is not supported - hint: ... mmproj` — no
+  vision-capable model is currently being served. computer-use's whole
+  design is screenshot-driven (IComputer returns image content blocks the
+  model must interpret to click/navigate), so LLM=murakumo cannot
+  successfully drive computeruse.agent/run today, even though the
+  connection itself works end-to-end for text. Fine for any
+  text-only ChatModel use of this fn; not fine yet for computer-use
+  specifically.
 
-    (throw (ex-info "LLM must be ollama, gemini or anthropic" {}))))
+  Optional `default-llm` overrides the fallback used when the LLM env var
+  is unset (still \"ollama\" when not supplied, unchanged for every
+  existing caller) — for a script that wants a different default without
+  forcing every caller to set LLM= explicitly."
+  ([] (make-model nil))
+  ([default-llm]
+   (case (or (System/getenv "LLM") default-llm "ollama")
+     "ollama"
+     (model/openai-model
+      (merge host-caps
+             {:url (or (System/getenv "OLLAMA_URL")
+                       "http://localhost:11434/v1/chat/completions")
+              :model (or (System/getenv "OLLAMA_MODEL") default-ollama-model)}))
+
+     "gemini"
+     (model/openai-model
+      (merge host-caps
+             {:url "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+              :model (or (System/getenv "GEMINI_MODEL") "gemini-2.5-flash")
+              :api-key (or (System/getenv "GEMINI_API_KEY")
+                           (throw (ex-info "GEMINI_API_KEY is required for LLM=gemini" {})))}))
+
+     "anthropic"
+     (model/anthropic-model
+      (cond-> (merge host-caps
+                     {:api-key (or (System/getenv "ANTHROPIC_API_KEY")
+                                   (throw (ex-info "ANTHROPIC_API_KEY is required for LLM=anthropic" {})))})
+        (System/getenv "ANTHROPIC_MODEL") (assoc :model (System/getenv "ANTHROPIC_MODEL"))))
+
+     "murakumo"
+     (model/openai-model
+      (merge host-caps
+             {:url (or (System/getenv "MURAKUMO_URL")
+                       "https://murakumo.cloud/api/v1/chat/completions")
+              :model (or (System/getenv "MURAKUMO_MODEL") default-murakumo-model)
+              :api-key (System/getenv "MURAKUMO_API_KEY")}))
+
+     (throw (ex-info "LLM must be ollama, gemini, anthropic or murakumo" {})))))

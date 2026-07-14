@@ -1,20 +1,32 @@
 {:paths ["src"]
- ;; Built on langgraph-clj (graph agent loop) which brings langchain-clj
+ ;; Built on langgraph (graph agent loop) which brings langchain
  ;; (ChatModel / tools / Datomic-API store). Both are zero-third-party-dep .cljc.
+ ;; Was pinned {:git/tag "v0.2.0" :sha "133740f..."} -- `:sha` (not
+ ;; `:git/sha`) is not a real tools.deps git-coord key, so it was silently
+ ;; dropped and resolution fell through to just `:git/tag "v0.2.0"`, which
+ ;; is langgraph's pre-org-rename commit (still depends on the OLD
+ ;; io.github.com-junkawasaki/langchain-clj coordinate, which shadows
+ ;; io.github.kotoba-lang/langchain's `langchain.model` namespace on the
+ ;; classpath and drops `openai-model` -- every example in this repo
+ ;; failed to load with `No such var: model/openai-model` as a result,
+ ;; not just new ones). Pinned past langgraph's org-rename
+ ;; (kotoba-lang/langgraph#3) to a commit that depends on
+ ;; io.github.kotoba-lang/langchain directly; no v0.2.x tag has this yet
+ ;; (newest tag v0.2.1 predates the rename), hence :git/sha only.
  :deps {io.github.com-junkawasaki/hil
         {:local/root "../hil"}
-        io.github.com-junkawasaki/langgraph-clj
-        {:git/tag "v0.2.0" :git/sha "133740f"}}
+        io.github.kotoba-lang/langgraph
+        {:git/sha "a332a770a0d2b5193f81b54483bb954fb29ef8d7"}}
  :aliases
  {:test {:extra-paths ["test"]
          :extra-deps {io.github.cognitect-labs/test-runner
                       {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
          :main-opts ["-m" "cognitect.test-runner"]
          :exec-fn cognitect.test-runner.api/test}
-  ;; local checkouts for workspace development (orgs/com-junkawasaki/*)
-  :dev {:override-deps {io.github.com-junkawasaki/langgraph-clj
+  ;; local checkouts for workspace development (orgs/kotoba-lang/*)
+  :dev {:override-deps {io.github.kotoba-lang/langgraph
                         {:local/root "../langgraph"}
-                        io.github.com-junkawasaki/langchain-clj
+                        io.github.kotoba-lang/langchain
                         {:local/root "../langchain"}}}
   ;; drive a real desktop with a local/remote model (Ollama Gemma 4 E4B QAT
   ;; by default). `clojure -M:gemma -m vultr-ip-allow 220.146.252.121 32`
