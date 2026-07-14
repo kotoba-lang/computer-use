@@ -13,7 +13,9 @@
  ;; (kotoba-lang/langgraph#3) to a commit that depends on
  ;; io.github.kotoba-lang/langchain directly; no v0.2.x tag has this yet
  ;; (newest tag v0.2.1 predates the rename), hence :git/sha only.
- :deps {io.github.kotoba-lang/langgraph
+ :deps {io.github.com-junkawasaki/hil
+        {:local/root "../hil"}
+        io.github.kotoba-lang/langgraph
         {:git/sha "a332a770a0d2b5193f81b54483bb954fb29ef8d7"}}
  :aliases
  {:test {:extra-paths ["test"]
