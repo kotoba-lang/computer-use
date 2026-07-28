@@ -14,7 +14,8 @@
  ;; io.github.kotoba-lang/langchain directly; no v0.2.x tag has this yet
  ;; (newest tag v0.2.1 predates the rename), hence :git/sha only.
  :deps {io.github.com-junkawasaki/hil
-        {:local/root "../hil"}
+        {:git/url "https://github.com/kotoba-lang/hil.git"
+         :git/sha "75f5b9ed3ed00161f331f868a224d3a71e5db00e"}
         io.github.kotoba-lang/langgraph
         {:git/sha "a332a770a0d2b5193f81b54483bb954fb29ef8d7"}}
  :aliases
@@ -25,9 +26,11 @@
          :exec-fn cognitect.test-runner.api/test}
   ;; local checkouts for workspace development (orgs/kotoba-lang/*)
   :dev {:override-deps {io.github.kotoba-lang/langgraph
-                        {:local/root "../langgraph"}
+                        {:git/url "https://github.com/kotoba-lang/langgraph.git"
+         :git/sha "577a59a9d5eb3ef90b81342f4673973f481ff7f4"}
                         io.github.kotoba-lang/langchain
-                        {:local/root "../langchain"}}}
+                        {:git/url "https://github.com/kotoba-lang/langchain.git"
+         :git/sha "51e7b61ec3d55e917d5dc77dac145197cb3340df"}}}
   ;; drive a real desktop with a local/remote model (Ollama Gemma 4 E4B QAT
   ;; by default). `clojure -M:gemma -m vultr-ip-allow 220.146.252.121 32`
   :gemma {:extra-paths ["examples"]
