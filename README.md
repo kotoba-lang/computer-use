@@ -179,10 +179,51 @@ ANTHROPIC_API_KEY=… clojure -Sdeps '{:paths ["src" "examples"]
         -M -e "(require 'vultr-ip-allow) (vultr-ip-allow/-main \"203.0.113.7\")"
 ```
 
+## Real host: a physical iPhone, through iPhone Mirroring
+
+`computeruse.ios-mirroring/iphone-mirroring-computer` implements IComputer
+over a **physical iPhone** as macOS 15+ mirrors it. There is no `adb` for
+iOS — Appium / WebDriverAgent / XCUITest are not here, and `simctl` is
+simulator-only and has no `tap` — so the channel is the mirroring window
+itself: `screencapture -R` over its rect for the screenshot, `cliclick`
+inside it for taps and swipes, System Events for keys.
+
+```clojure
+(ios/iphone-mirroring-computer {:model-width 480})
+```
+
+Two corrections distinguish it from the Android driver, and both are silent
+when wrong, so both are pinned by tests: the model's coordinates are offsets
+into a **crop**, so the content origin has to be added back; and the scale is
+points-per-model-pixel, taken from the window rect in **points**, never from
+the Retina capture's pixels.
+
+`key "home"` / `"appswitcher"` / `"spotlight"` map to iPhone Mirroring's own
+`⌘1` / `⌘2` / `⌘3`, which is how the phone is navigated — there is no home
+button to tap. `right_click` is a press-and-hold, iOS's actual secondary
+gesture. Swipes send interpolated motion samples in one `cliclick`
+invocation; a press and a release with nothing between them is read by iOS as
+a tap.
+
+It cannot do multitouch (one pointer), cannot be frame-accurate (the picture
+is a live video stream), and stops the moment someone picks the phone up.
+Turn-based and slow real-time games are the honest target.
+
+`examples/iphone_game_agent.clj` drives it as a game player:
+
+```sh
+clojure -M:dev:gemma -e "(require 'iphone-game-agent) (iphone-game-agent/-main \"Solitaire\")"
+```
+
+The pure half — coordinate mapping, gesture paths, key scripts — is tested
+(`test/computeruse/ios_mirroring_test.cljc`, runs on cljs too). The shell-outs
+are not, and cannot be without a Mac, a paired iPhone and two granted
+permissions.
+
 ## Tests / example
 
 ```sh
-clojure -M:test     # 13 tests, 60 assertions
+clojure -M:test     # 30 tests, 121 assertions
 clojure -Sdeps '{:paths ["src" "examples"]
                  :deps {io.github.kotoba-lang/langgraph
                         {:git/sha "a332a770a0d2b5193f81b54483bb954fb29ef8d7"}}}' \
