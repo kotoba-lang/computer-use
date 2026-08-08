@@ -268,9 +268,14 @@
 
    opts:
      :app-name      window owner (default \"iPhone Mirroring\")
-     :model-width   width of the image shown to the model (default 480 —
-                    a phone screen is tall, and a wider image mostly buys
-                    tokens rather than detail)
+     :model-width   width in pixels of the image shown to the model
+                    (default 480). Resized with `sips --resampleWidth`, NOT
+                    `-Z`: `-Z` caps the LARGEST dimension, so on a portrait
+                    phone it would pin the height and leave the width around
+                    220 — legible as a thumbnail, not as a game. That is the
+                    right idiom in `computeruse.macos` only because a desktop
+                    display is landscape, where the largest dimension is the
+                    width.
      :content-inset [left top right bottom] points of app chrome to exclude
                     (default [0 26 0 0] — the title bar)
      :rect          [x y w h] to use instead of asking System Events, for
@@ -292,15 +297,25 @@
               long-press-ms 700}}]]
   (let [;; last observed geometry; refreshed on every screenshot, because the
         ;; window can be moved or resized between actions
-        geom    (atom nil)
-        content #(or (:content @geom)
-                     (content-rect (or rect (mirroring-window-rect app-name))
-                                   content-inset))
-        scale   #(or (:scale @geom) [1.0 1.0])
-        focus!  #(macos/activate-application! app-name)
-        at      (fn [mx my]
-                  (let [cr (content)]
-                    (clamp-to-content cr (model->screen cr (scale) mx my))))]
+        geom      (atom nil)
+        ;; Acting before the first screenshot has no defensible mapping: the
+        ;; scale is only known once an image has actually been measured. A
+        ;; default of [1.0 1.0] would put every tap somewhere plausible and
+        ;; wrong, which is the failure this namespace exists to prevent — so
+        ;; refuse, the same way mirroring-window-rect refuses.
+        observed! (fn []
+                    (or @geom
+                        (throw (ex-info
+                                (str "no screenshot has been taken yet, so the "
+                                     "coordinate mapping is unmeasured. Take a "
+                                     "screenshot before acting.")
+                                {:action :screenshot}))))
+        content   #(:content (observed!))
+        scale     #(:scale (observed!))
+        focus!    #(macos/activate-application! app-name)
+        at        (fn [mx my]
+                    (let [cr (content)]
+                      (clamp-to-content cr (model->screen cr (scale) mx my))))]
 
     (reify c/IComputer
 
@@ -316,7 +331,7 @@
                             {:rect cr :inset content-inset})))
           (sh "screencapture" "-x" "-t" "png"
               "-R" (str x "," y "," w "," h) path)
-          (sh "sips" "-Z" (str model-width) path)
+          (sh "sips" "--resampleWidth" (str model-width) path)
           (let [[mw mh] (or (png-pixel-size path) [model-width model-width])]
             ;; scale is points-per-model-pixel: computed from the rect in
             ;; POINTS, never from the captured pixels (Retina writes 2× there)
@@ -341,14 +356,17 @@
       (-mouse-move! [_ x y]
         ;; A touchscreen has no hover. Moving the pointer without pressing is
         ;; observable to nothing on the phone, so this only parks the cursor.
-        (focus!)
+        ;; Coordinates are resolved before focusing, here and below: an
+        ;; unmeasured mapping is a caller error, and it should surface without
+        ;; having first pulled a window to the front.
         (let [[px py] (at x y)]
+          (focus!)
           (sh "cliclick" (str "m:" px "," py))
           (str "Moved to [" px " " py "] (no touch — iOS has no hover)")))
 
       (-click! [_ button x y]
-        (focus!)
         (let [[px py] (at x y)]
+          (focus!)
           (case button
             :double (sh "cliclick" (str "dc:" px "," py))
             ;; iOS has no secondary click; its secondary gesture is the hold
@@ -360,11 +378,11 @@
                " [" px "," py "]")))
 
       (-scroll! [_ x y direction amount]
-        (focus!)
         (let [cr      (content)
               [px py] (at x y)
               [dx dy] (scroll-delta direction amount notch-points)
               end     (clamp-to-content cr [(+ px dx) (+ py dy)])]
+          (focus!)
           (apply sh "cliclick" (drag-args [px py] end {:steps swipe-steps}))
           (str "swipe-" (name (keyword direction)) " ×" (or amount 3)
                " " [px py] "→" end)))

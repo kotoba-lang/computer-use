@@ -6,14 +6,18 @@
    shell-outs around them are not tested here and cannot be — they need a Mac,
    a paired iPhone, and two granted permissions."
   (:require [clojure.test :refer [deftest is testing]]
-            [computeruse.ios-mirroring :as m]))
+            [computeruse.ios-mirroring :as m]
+            #?(:clj [computeruse.computer])))
 
 ;; A window that is NOT at the origin and is NOT square: a dropped content
 ;; origin, or a swapped x/y scale, changes the answers below.
 (def win [100 50 400 900])
 (def inset [0 26 0 0])
 (def content (m/content-rect win inset))          ; [100 76 400 874]
-(def model [480 1049])                            ; as if sips -Z 480
+;; as if `sips --resampleWidth 480` — width pinned, height follows the aspect.
+;; NOT `sips -Z 480`, which caps the largest dimension and would give ~220x480
+;; on a portrait phone. The driver uses --resampleWidth for exactly this reason.
+(def model [480 1049])
 (def scale (m/scale-factors content model))
 
 (deftest parse-numbers-reads-system-events-answers
@@ -119,6 +123,22 @@
   (testing "a lone modifier name is a keystroke, not an empty using clause"
     (is (= "tell application \"System Events\" to keystroke \"cmd\""
            (m/key-script "cmd")))))
+
+#?(:clj
+   (deftest acting-before-a-screenshot-refuses-rather-than-guessing
+     ;; :rect supplies the geometry, so this needs no System Events call — but
+     ;; the SCALE is still unknown until an image has been measured. Defaulting
+     ;; it to 1:1 would put every tap somewhere plausible and wrong. The refusal
+     ;; must also come before the window is pulled to the front, which is what
+     ;; makes it observable here: cliclick and osascript do not exist on CI.
+     (let [c (m/iphone-mirroring-computer {:rect [100 50 400 900]})]
+       (doseq [[what f] [["click" #(computeruse.computer/-click! c :left 10 10)]
+                         ["move"  #(computeruse.computer/-mouse-move! c 10 10)]
+                         ["scroll" #(computeruse.computer/-scroll! c 10 10 :down 3)]]]
+         (testing what
+           (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                                 #"no screenshot has been taken yet"
+                                 (f))))))))
 
 (deftest applescript-strings-are-escaped
   (is (= "he said \\\"hi\\\"" (m/escape-applescript "he said \"hi\"")))

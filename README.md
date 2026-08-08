@@ -205,6 +205,13 @@ gesture. Swipes send interpolated motion samples in one `cliclick`
 invocation; a press and a release with nothing between them is read by iOS as
 a tap.
 
+Acting before the first screenshot **refuses** rather than assuming a 1:1
+scale — an unmeasured mapping puts every tap somewhere plausible and wrong,
+which is the failure this driver exists to prevent. Resizing uses `sips
+--resampleWidth`, not `-Z`: `-Z` caps the *largest* dimension, which on a
+portrait phone pins the height and leaves the image about 220px wide. `-Z` is
+right in `computeruse.macos` only because a desktop display is landscape.
+
 It cannot do multitouch (one pointer), cannot be frame-accurate (the picture
 is a live video stream), and stops the moment someone picks the phone up.
 Turn-based and slow real-time games are the honest target.
@@ -223,7 +230,7 @@ permissions.
 ## Tests / example
 
 ```sh
-clojure -M:test     # 30 tests, 121 assertions
+clojure -M:test     # 31 tests, 124 assertions
 clojure -Sdeps '{:paths ["src" "examples"]
                  :deps {io.github.kotoba-lang/langgraph
                         {:git/sha "a332a770a0d2b5193f81b54483bb954fb29ef8d7"}}}' \
