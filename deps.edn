@@ -13,7 +13,13 @@
  ;; (kotoba-lang/langgraph#3) to a commit that depends on
  ;; io.github.kotoba-lang/langchain directly; no v0.2.x tag has this yet
  ;; (newest tag v0.2.1 predates the rename), hence :git/sha only.
- :deps {io.github.com-junkawasaki/hil
+ :deps {;; The repository is kotoba-lang/hil. io.github.<org>/<name> is the coordinate
+        ;; tools.deps derives from it, and it is the one spelling all three declarers
+        ;; (this repo, cloud-itonami/cloud-itonami-app, etzhayyim/tamaki) now agree on.
+        ;; Previously this said io.github.com-junkawasaki/hil while the other two said
+        ;; the bare kotoba-lang/hil: three names, one repository, and any closure that
+        ;; reached two of them would have carried hil.* twice.
+        io.github.kotoba-lang/hil
         {:git/url "https://github.com/kotoba-lang/hil.git"
          :git/sha "75f5b9ed3ed00161f331f868a224d3a71e5db00e"}
         io.github.kotoba-lang/langgraph
