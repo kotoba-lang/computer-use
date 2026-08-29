@@ -1,4 +1,4 @@
-{:paths ["src"]
+{:paths ["src" "resources"]
  ;; Built on langgraph (graph agent loop) which brings langchain
  ;; (ChatModel / tools / Datomic-API store). Both are zero-third-party-dep .cljc.
  ;; Was pinned {:git/tag "v0.2.0" :sha "133740f..."} -- `:sha` (not
