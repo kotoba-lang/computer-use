@@ -12,9 +12,18 @@ Sibling of [browser-use-clj](https://github.com/com-junkawasaki/browser-use-clj)
 
 ```
 src/computeruse/
-  computer.cljc  IComputer protocol (host capability) + mock virtual screen
-  tool.cljc      the computer tool — Anthropic action vocabulary → protocol dispatch
-  agent.cljc     sampling loop (langgraph StateGraph) + action log as datoms
+  computer.cljc        IComputer protocol (host capability) + mock virtual screen
+  tool.cljc            the computer tool — Anthropic action vocabulary → protocol dispatch
+  agent.cljc           sampling loop (langgraph StateGraph) + action log as datoms
+
+  backend.cljc         IBackend — WHERE the screen is (observe!/act!/probe!), 10 ids
+  backends.cljc        the four implemented backends
+  bots.cljc            multi-bot resident layer: roster, action gate, receipts
+  model_adapters.cljc  interpretation adapters (claude-cli / murakumo / openai-compat)
+  json.cljc            dependency-free JSON, so the CLI runs under nbb
+  hostfs.cljc          the filesystem seam
+bin/cua_bot_run.cljs   the resident CLI (nbb)
+resources/computeruse/backends.edn   the backend registry, with measured qualification
 ```
 
 ## Design
@@ -35,6 +44,198 @@ src/computeruse/
   (`:caction/action`, `:caction/input`, …): "every click in session
   s1" is a Datalog query. Graph checkpoints (resume /
   human-in-the-loop) come from langgraph-clj.
+
+## Selectable execution backends
+
+`IComputer` says *what* you can do to a desktop. `IBackend`
+(`computeruse.backend`, ADR-0003) says **where the screen is** — and a
+resident bot picks one with a single keyword.
+
+```clojure
+(require '[computeruse.backend :as b] '[computeruse.backends])
+
+(def be (b/create-backend :window-scoped {:app "Google Chrome"} {}))
+
+(b/probe! be)    ;=> {:available? true :why "12 on-screen windows; target matches window 2985" …}
+(b/observe! be)  ;=> {:png-path "/tmp/cua-win2985-….png" :window {…} :width 1300 :height 800
+                 ;    :frame-stats {:stddev 94.4 :blank? false}}
+(b/act! be {:kind :script :applescript "tell application \"Google Chrome\" to …"})
+(b/act! be {:kind :key :combo "cmd+l"})
+;=> {:refused true :reason :backend/unsupported-action-kind …}   ; never a silent no-op
+```
+
+Ten ids, fixed. The registry
+(`resources/computeruse/backends.edn`) carries each one's isolation
+properties — **does it take the operator's focus and cursor?** — and a
+per-capability `:qualification` with **the date it was measured**.
+
+| id | what it is | focus? | observe / act (measured 2026-08-29) |
+|---|---|---|---|
+| `:macos-local` | this machine's whole desktop | **yes** | qualified / **refused** — deny-by-default, needs `:allow-foreground true` |
+| `:window-scoped` | one window by CGWindowID | no | **qualified** / qualified (`:script` only) |
+| `:agent-space` | a background macOS Space | no | pending / pending |
+| `:fleet-node` | a murakumo node over ssh | no | **unavailable** / unavailable |
+| `:macos-vm` | a macOS guest VM | no | pending / pending |
+| `:linux-container` | a container with Xvfb | no | pending / pending |
+| `:cf-browser` | Cloudflare Browser Rendering | no | pending / pending |
+| `:cf-sandbox` | a Cloudflare Sandbox container | no | pending / pending |
+| `:saas-sandbox` | a hosted computer-use sandbox | no | pending / pending |
+| `:host-object` | no screen — a probe command's verdict | no | **qualified** / refused (observation-only) |
+
+Notes on the measured ones, because the table is not the evidence:
+
+- **`:window-scoped` does not focus the window it captures.**
+  `screencapture -l <id>` was measured to leave the frontmost
+  application unchanged. Its act path is app-scripting only;
+  `:pointer` / `:key` / `:type` are refused **permanently** by name,
+  because synthetic global input lands wherever the OS focus is, and
+  this workstation runs many concurrent agent sessions in terminal
+  panes competing for it.
+- **Refusing the action kinds was not enough — measured 2026-08-29.**
+  In a real session the model wrote `tell application "Google Chrome"
+  to activate` followed by `tell application "System Events" to key
+  code 116`, and the gate allowed it four steps running because the
+  *kind* was `:script`. The `:script` **content** is now checked too:
+  System Events `keystroke` / `key code` / `key down|up` / `click at`,
+  and `do shell script` / `run script`, refuse with
+  `:backend/synthetic-input-in-script` before reaching `osascript`.
+  This is a denylist over a language with indirection, so it is a
+  floor, not a proof — the structural guarantee is that the kinds are
+  refused. A script may still `activate` an app (focus without input);
+  when it does, the act result carries `:activated-app? true` so the
+  receipt shows it.
+- **`:fleet-node` is implemented and does not work today.** judah,
+  simeon and zebulun are all ssh-reachable and all have
+  `/usr/sbin/screencapture`, but the ssh session has no window server:
+  `could not create image from display`, exit 1, no file. `probe!`
+  measures that on every call rather than assuming it. Nothing was installed
+  on any node.
+- **The six `:pending` ids are selectable and honest**: `observe!` and
+  `act!` refuse with `:backend/not-implemented`, and `probe!` answers
+  `:unmeasured` — never `false`, which would claim a measurement
+  nobody took. Each carries a concrete `:unblock` condition.
+
+A capture that worked and a black rectangle both exit 0, so every
+visual observation carries `:frame-stats` (a 32px downsample's byte
+stddev). A blank frame ends the session as `:could-not-measure`, not
+as a passing observation.
+
+## Resident bots
+
+A roster is a vector of entries; one bot is one session.
+
+```clojure
+{:bot/id "uiux-bots-page-qa"          ; [a-z0-9][a-z0-9-]{0,63}
+ :bot/goal "verify the three live sections render"
+ :bot/backend :window-scoped          ; one keyword — this is the promotion knob
+ :bot/target {:app "Google Chrome" :url "https://itonami.cloud/bots/"}
+ :bot/interval-s 21600
+ :bot/max-steps 8                     ; ≤ 24
+ :bot/allowed-actions #{:script}      ; ⊆ #{:pointer :key :type :script}
+ :bot/budget-tokens 30000}
+```
+
+Validation is fail-closed and every rejection has its own reason
+literal (`:bot/unknown-backend`, `:bot/blank-goal`,
+`:roster/duplicate-id`, …). Backend ids are checked against the
+registry, not against a copy of the list.
+
+The loop is **observe → interpret → gate → act**, and the gate is
+deterministic and runs before *every* act:
+
+| reason | when |
+|---|---|
+| `:gate/step-ceiling-reached` | step ≥ `:bot/max-steps` |
+| `:gate/budget-exhausted` | tokens ≥ `:bot/budget-tokens` |
+| `:gate/malformed-action` | not an action map / unknown kind |
+| `:gate/action-kind-not-allowed` | not in `:bot/allowed-actions` |
+| `:gate/frame-dimensions-unknown` | the frame did not report its size |
+| `:gate/coordinate-outside-frame` | the coordinate is outside it |
+
+A refusal is **recorded in the receipt with its literal** and fed back
+to the model as history — never dropped. `:gate/frame-dimensions-unknown`
+exists so that a backend which does not report its size cannot earn
+unbounded clicks by omission.
+
+### The CLI
+
+```sh
+nbb bin/cua_bot_run.cljs --roster <path.edn> --bot <bot-id> \
+    --receipts-dir <dir> [--dry-run] [--adapter claude-cli|murakumo|openai-compat]
+```
+
+Exit codes are three-valued and stay three-valued:
+
+| exit | meaning |
+|---|---|
+| 0 | the session completed (outcome in the receipt) |
+| 1 | the session ran and failed |
+| 2 | it could not be measured — invalid roster, unknown bot, backend unavailable, dead adapter, blank frame |
+
+**The nbb path is the one that was verified** (nbb v1.4.208; `nbb.edn`
+supplies the classpath, and no namespace the CLI reaches has a
+third-party dependency, so it runs from a bare checkout). The library
+also compiles and tests on the JVM (`clojure -M:test`), but there is no
+JVM entry point for the CLI.
+
+Each session writes a receipt EDN — `{:bot-id :backend :frames
+:actions :outcome :started :finished :tokens-used}` — into
+`--receipts-dir`. Screenshots stay out of git.
+
+### Two real sessions (2026-08-29, before landing)
+
+`:host-object` / `isekai-touch-qa` — **exit 0**, `:done`, 29s, 999
+tokens, zero acts. It ran network-isekai's deterministic touch gate and
+concluded from its verdict: *"jintori scene verified responding with
+touch stick input handling: 7/7 tests passed, compilation successful,
+axis-based input detection working"*.
+
+`:window-scoped` / `uiux-bots-page-qa` — **exit 1**, `:failed`, 7 steps,
+8 frames, 10,822 tokens. It captured a Chrome window eight times without
+focusing it and ended the session itself with `{:done true :success
+false}`: *"Grok runtime and Workstation loops sections are visible and
+rendering live data with current timestamps (not stale). No empty
+sections or error displays observed in visible content. Hyakka section
+not visible in current viewport — unable to confirm its status."*
+
+That is the correct three-valued answer, not a defect: a session that
+confirmed two of three sections and said so is not `:done`, and it is
+not `:could-not-measure` either. In the same session the script guard
+fired in production — step 1's `keystroke "l" using command down` … `key
+code 36` was refused and never reached `osascript`.
+
+### Model adapters
+
+An adapter is `(fn [{:keys [prompt image-path]}] → {:text :tokens :adapter})`.
+Measured 2026-08-29, both were proved to **actually read the image**,
+not merely to accept one:
+
+| adapter | evidence | time |
+|---|---|---|
+| `:claude-cli` (default) | described a Japanese conversation about bread storage that is visible only inside the screenshot | 9.3s |
+| `:murakumo` | answered "the ChatGPT desktop application window" for a capture of the ChatGPT window | 64s |
+
+Neither answer is derivable from the prompt or the file name.
+
+`:murakumo` resolves the `murakumo-main` alias (env override → the
+alias entry → an endpoint-only fallback); no concrete model id is
+written down anywhere. ⚠ Measured the same day: the endpoint the alias
+entry itself declares returned **HTTP 404** for both a text and a
+vision request, and `https://api.murakumo.cloud/v1/chat/completions`
+answered. The resolver tries the declared endpoint first, falls back,
+and records which one answered.
+
+`:claude-cli` shells `claude -p --allowedTools Read --output-format
+json`, with the subprocess's cwd set to the directory holding the
+screenshot — Claude Code will not `Read` outside its working
+directory, and a bot whose frames live in `/tmp` would otherwise get an
+"I cannot see an image" answer that looks exactly like a model that
+looked and saw nothing. It needs no `--dangerously-skip-permissions`
+(measured: `permission_denials` empty).
+
+The existing `computeruse.openai-model` ChatModel adapter is unchanged
+and still drives the langgraph loop on the JVM;
+`computeruse.bots/backend->computer` binds that loop to any backend.
 
 ## Quickstart
 
@@ -230,7 +431,8 @@ permissions.
 ## Tests / example
 
 ```sh
-clojure -M:test     # 31 tests, 124 assertions
+clojure -M:test     # 75 tests, 477 assertions
+clojure -M:lint     # clj-kondo, errors fail
 clojure -Sdeps '{:paths ["src" "examples"]
                  :deps {io.github.kotoba-lang/langgraph
                         {:git/sha "a332a770a0d2b5193f81b54483bb954fb29ef8d7"}}}' \

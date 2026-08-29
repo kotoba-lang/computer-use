@@ -1,0 +1,6 @@
+;; nbb.edn — classpath for the resident bot CLI (bin/cua_bot_run.cljs).
+;; The CLI is invoked as `nbb bin/cua_bot_run.cljs …` from this checkout
+;; root; nbb reads this file for :paths. There are no :deps on purpose —
+;; every namespace the CLI reaches is portable .cljc in src/ with no
+;; third-party dependency, so the CLI runs from a bare checkout.
+{:paths ["src" "bin" "resources"]}
