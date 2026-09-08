@@ -13,7 +13,7 @@
   parse failure is a real failure and must not look like an empty
   response."
   (:refer-clojure :exclude [read])
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 ;; ───────────────────────── writer ─────────────────────────
 

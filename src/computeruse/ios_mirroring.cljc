@@ -56,7 +56,7 @@
   Everything above the `#?(:clj)` boundary is pure and runs on any host; only
   the shell-outs are JVM-only."
   (:require [computeruse.computer :as c]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             #?(:clj [computeruse.macos :as macos])))
 
 ;; ─── pure: geometry ──────────────────────────────────────────────────────────
@@ -183,7 +183,7 @@
 (defn resolve-combo
   "Expand an iPhone-Mirroring shortcut name; pass anything else through."
   [combo]
-  (get mirroring-shortcuts (str/lower-case (str/trim (or combo ""))) combo))
+  (get mirroring-shortcuts (str/lower (str/trim (or combo ""))) combo))
 
 (defn escape-applescript [s]
   (-> (str s)
@@ -206,7 +206,7 @@
    Bare modifier names are not treated as modifiers of nothing: \"cmd\" alone
    is a keystroke request, not an empty `using` clause."
   [combo]
-  (let [parts (str/split (str/lower-case (resolve-combo combo)) #"\+")
+  (let [parts (str/split (str/lower (resolve-combo combo)) #"\+")
         mods  (if (= 1 (count parts)) [] (keep modifier-clauses (butlast parts)))
         k     (last parts)
         using (when (seq mods) (str " using {" (str/join ", " mods) "}"))]

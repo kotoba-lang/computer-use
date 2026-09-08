@@ -11,7 +11,7 @@
   :http-fn/:json-read, macos.cljc's toolchain)."
   (:require [computeruse.backend :as b]
             [computeruse.hostfs :as fs]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [clojure.edn :as edn]))
 
 ;; ───────────────────────── host seams ─────────────────────────
@@ -316,7 +316,7 @@ if let list = CGWindowListCopyWindowInfo(opts, kCGNullWindowID) as? [[String: An
               "alt" "option down" "option" "option down"
               "shift" "shift down"}
         named {"return" 36 "enter" 36 "tab" 48 "space" 49 "escape" 53 "esc" 53}
-        parts (str/split (str/lower-case (str combo)) #"\+")
+        parts (str/split (str/lower (str combo)) #"\+")
         ms (keep mods (butlast parts))
         k (last parts)
         using (when (seq ms) (str " using {" (str/join ", " ms) "}"))]

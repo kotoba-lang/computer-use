@@ -1,6 +1,6 @@
 (ns computeruse.agent-test
   (:require [clojure.test :refer [deftest is testing]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [computeruse.computer :as c]
             [computeruse.tool :as ctool]
             [computeruse.agent :as agent]

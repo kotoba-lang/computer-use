@@ -17,7 +17,7 @@
     {:ref  \"op://Private/Vultr/password\"}            ; explicit secret-reference URI
     {:item \"Vultr\" :field \"password\" :vault \"Private\"}
   String refs (\"op://…\", \"bw://item/field\") are also accepted."
-  #?(:clj (:require [clojure.string :as str])))
+  #?(:clj (:require [kotoba.lang.text :as str])))
 
 (defprotocol IVault
   (-resolve [v reference]

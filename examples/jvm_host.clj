@@ -8,7 +8,7 @@
   \"model not found\" (byte-identical bodies succeed via curl, fail via
   java.net.http regardless of HTTP version / User-Agent / Accept — an
   Ollama request-framing quirk). curl is the reliable transport here."
-  (:require [clojure.data.json :as json]
+  (:require [kotoba.lang.text] [clojure.data.json :as json]
             [clojure.java.io :as io]
             [langchain.model :as model]))
 
@@ -17,7 +17,7 @@
         ;; body via stdin (--data-binary @-) to avoid arg-length limits on
         ;; large screenshot payloads
         args (concat ["curl" "-sS" "-m" "300"
-                      "-X" (-> method name clojure.string/upper-case)
+                      "-X" (-> method name kotoba.lang.text/upper)
                       "-w" "\n%{http_code}"]
                      hdr-args
                      (when body ["--data-binary" "@-"])

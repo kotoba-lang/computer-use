@@ -16,7 +16,7 @@
   right side of that boundary and is far more reliable than pixel
   clicking. The curl-IMAPS model is borrowed from manimani's
   channels.email/curl-imap-fetch — zero third-party deps."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [computeruse.vault :as vault]))
 
 (defprotocol IMail

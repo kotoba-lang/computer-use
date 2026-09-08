@@ -1,6 +1,6 @@
 (ns computeruse.ngc-test
   (:require [clojure.test :refer [deftest is]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [computeruse.computer :as computer]
             [computeruse.ngc :as ngc]))
 
