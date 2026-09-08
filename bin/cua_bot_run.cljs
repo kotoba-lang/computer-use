@@ -20,7 +20,7 @@
             [computeruse.bots :as bots]
             [computeruse.hostfs :as fs]
             [computeruse.model-adapters :as adapters]
-            [clojure.string :as str]))
+            [kotoba.lang.text :as str]))
 
 (def argv (vec *command-line-args*))
 
