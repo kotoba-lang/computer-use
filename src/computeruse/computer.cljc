@@ -11,7 +11,7 @@
   (mock), or Anthropic image content blocks
   [{:type \"image\" :source {:type \"base64\" …}}] (real host) —
   computeruse.tool passes them through to the tool result untouched."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (defprotocol IComputer
   (-screenshot [c])

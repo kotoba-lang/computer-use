@@ -1,6 +1,6 @@
 (ns computeruse.vault-test
   (:require [clojure.test :refer [deftest is testing]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [computeruse.computer :as c]
             [computeruse.vault :as vault]
             [computeruse.tool :as ctool]))

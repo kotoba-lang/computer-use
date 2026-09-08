@@ -19,7 +19,7 @@
   agent run on top of it must never type secrets (see
   examples/vultr_ip_allow.clj for the guardrail prompt)."
   (:require [computeruse.computer :as c]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [hil.core :as hil])
   #?(:clj (:import [java.util Base64]
                    [java.nio.file Files Paths])))
@@ -89,7 +89,7 @@
 (defn- key-script
   "xdotool-style combo (\"ctrl+l\", \"Return\", \"cmd+shift+t\") → AppleScript."
   [combo]
-  (let [parts (str/split (str/lower-case combo) #"\+")
+  (let [parts (str/split (str/lower combo) #"\+")
         mods (keep modifiers (butlast parts))
         mods (if (and (= 1 (count parts)) (modifiers (first parts))) [] mods)
         k (last parts)

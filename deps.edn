@@ -13,7 +13,12 @@
  ;; (kotoba-lang/langgraph#3) to a commit that depends on
  ;; io.github.kotoba-lang/langchain directly; no v0.2.x tag has this yet
  ;; (newest tag v0.2.1 predates the rename), hence :git/sha only.
- :deps {;; The repository is kotoba-lang/hil. io.github.<org>/<name> is the coordinate
+ :deps {
+        ;; kotoba.lang.text, not clojure.string. Pinned as an explicit floor:
+        ;; tools.deps takes the NEWEST sha it is shown, so without a floor here
+        ;; this repo silently rides whatever a sibling happens to name.
+        io.github.kotoba-lang/text {:git/sha "73bdb13ae7a3d004b44bca08be03a3191157a38f"}
+       ;; The repository is kotoba-lang/hil. io.github.<org>/<name> is the coordinate
         ;; tools.deps derives from it, and it is the one spelling all three declarers
         ;; (this repo, cloud-itonami/cloud-itonami-app, etzhayyim/tamaki) now agree on.
         ;; Previously this said io.github.com-junkawasaki/hil while the other two said

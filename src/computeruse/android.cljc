@@ -15,7 +15,7 @@
     • adb in PATH and device connected with USB debugging enabled
     • sips (macOS built-in) for PNG resizing"
   (:require [computeruse.computer :as c]
-            [clojure.string :as str])
+            [kotoba.lang.text :as str])
   #?(:clj (:import [java.util Arrays Base64]
                    [java.io ByteArrayOutputStream]
                    [java.nio ByteBuffer]
@@ -125,7 +125,7 @@
                      :data       (.encodeToString (Base64/getEncoder) resized)}}]))
 
       (-key! [_ combo]
-        (let [lower (str/lower-case combo)
+        (let [lower (str/lower combo)
               parts (str/split lower #"\+")
               ;; handle modifier+key combos via multiple keyevents
               code  (or (android-key-codes (last parts)) (last parts))]

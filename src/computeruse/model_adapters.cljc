@@ -28,7 +28,7 @@
   Neither answer is derivable from the prompt or the file name."
   (:require [computeruse.hostfs :as fs]
             [computeruse.json :as json]
-            [clojure.string :as str]))
+            [kotoba.lang.text :as str]))
 
 ;; ───────────────────────── claude CLI ─────────────────────────
 

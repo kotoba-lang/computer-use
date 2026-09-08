@@ -3,7 +3,7 @@
   nbb/Node. Kept tiny and dependency-free on purpose: the resident bot
   CLI runs under nbb from a bare checkout (no tools.deps resolution), so
   every namespace it reaches must load on both hosts."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (defn path-exists?
   "Named path-exists? rather than exists? because cljs.core/exists? is a
