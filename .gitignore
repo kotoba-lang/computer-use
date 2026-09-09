@@ -10,3 +10,6 @@ cua-*.bmp
 cua-*.swift
 receipts/
 .cua/
+
+# nbb dependency cache -- a build artifact, not source
+.nbb/
