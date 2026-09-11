@@ -8,7 +8,7 @@
   button — it stops at the review screen and calls `done`. The human makes the
   spend-commit click. Budget is capped at ¥3,000/campaign regardless.
 
-     LANG=en clojure -M:dev:examples -e \\
+     LANG=en kbb -M:dev:examples -e \\
        \"(require 'google-ads-ep1) (google-ads-ep1/-main)\"
 
   Env: LANG (default en), ADS_BROWSER (default \"Microsoft Edge\")."

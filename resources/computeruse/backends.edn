@@ -201,7 +201,7 @@
                  :timeout-ms "int — default 600000"}
    :qualification
    {:observe {:status :qualified :measured-at "2026-08-29"
-              :how "ran the isekai-touch-qa target (nbb scripts/run-task.cljs jintori-touch in orgs/network-awai/network-isekai) and captured its exit plus its final EDN line"}
+              :how "ran the isekai-touch-qa target (kbb --backend sci scripts/run-task.cljk jintori-touch in orgs/network-awai/network-isekai) and captured its exit plus its final EDN line"}
     :act {:status :refused :measured-at "2026-08-29"
           :reason :backend/act-unsupported
           :why "observation-only by construction; there is nothing to act on"}

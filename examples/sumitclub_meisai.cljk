@@ -6,7 +6,7 @@
   Runs on a LOCAL model by default — Ollama serving gemma 4 QAT
   (tools + vision capable), so statement data never leaves the machine:
 
-     clojure -M:dev:examples -e \"(require 'sumitclub-meisai) (sumitclub-meisai/-main)\"
+     kbb -M:dev:examples -e \"(require 'sumitclub-meisai) (sumitclub-meisai/-main)\"
 
   Model backend is selected by LLM=ollama|gemini|anthropic (see
   jvm-host): gemini uses Gemini's OpenAI-compatible endpoint with

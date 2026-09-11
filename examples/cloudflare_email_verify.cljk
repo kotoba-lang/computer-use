@@ -13,7 +13,7 @@
   Runs on a LOCAL model by default — Ollama serving gemma 4 QAT (see jvm-host),
   so nothing leaves the machine. Model backend: LLM=ollama|gemini|anthropic.
 
-     clojure -M:dev:examples -e \\
+     kbb -M:dev:examples -e \\
        \"(require 'cloudflare-email-verify) (cloudflare-email-verify/-main)\"
 
   Env:

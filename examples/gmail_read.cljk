@@ -17,7 +17,7 @@
   Runs on a LOCAL model by default — Ollama serving gemma 4 QAT (see
   jvm-host), so mail content stays on the machine.
 
-     clojure -M:dev:examples -e \\
+     kbb -M:dev:examples -e \\
        \"(require 'gmail-read) (gmail-read/-main)\"
 
   Env:

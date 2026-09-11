@@ -1,7 +1,7 @@
-#!/usr/bin/env nbb
+#!/usr/bin/env kbb
 ;; bin/cua_bot_run.cljk — run ONE resident CUA bot session (ADR-0003).
 ;;
-;;   nbb bin/cua_bot_run.cljk --roster <path.edn> --bot <bot-id> \
+;;   kbb --backend sci bin/cua_bot_run.cljk --roster <path.edn> --bot <bot-id> \
 ;;       --receipts-dir <dir> [--dry-run] [--adapter claude-cli|murakumo|openai-compat]
 ;;
 ;; Exit codes are three-valued and stay three-valued:
@@ -45,7 +45,7 @@
 
 (defn- repo-root
   "The checkout this CLI lives in — nbb gives no __dirname, so derive it
-  from the process cwd (the CLI is invoked as `nbb bin/cua_bot_run.cljk`
+  from the process cwd (the CLI is invoked as `kbb --backend sci bin/cua_bot_run.cljk`
   from the checkout root, which is the published calling contract)."
   []
   (fs/cwd))
@@ -82,7 +82,7 @@
 
     (when-not (and roster-path bot-id)
       (bail! :bad-arguments
-             "usage: nbb bin/cua_bot_run.cljk --roster <path> --bot <id> --receipts-dir <dir> [--dry-run]"))
+             "usage: kbb --backend sci bin/cua_bot_run.cljk --roster <path> --bot <id> --receipts-dir <dir> [--dry-run]"))
 
     (let [registry (b/find-registry (repo-root))]
       (when (nil? registry)

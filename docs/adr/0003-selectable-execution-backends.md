@@ -215,7 +215,7 @@ env override → alias → endpoint-only fallback）。**具体的な model id �
 
 **`:host-object` / `isekai-touch-qa`** — exit **0**、`:done`、29s、999 tokens、
 step 0（act 無し）。network-isekai の決定論 gate
-（`nbb scripts/run-task.cljs jintori-touch`）を実際に回し、その verdict を
+（`kbb --backend sci scripts/run-task.cljk jintori-touch`）を実際に回し、その verdict を
 observation として model が結論した:
 
 > "jintori scene verified responding with touch stick input handling:

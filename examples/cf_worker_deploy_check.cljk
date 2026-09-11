@@ -32,7 +32,7 @@
   2FA/SSO step with no secret_ref the agent bails (done success=false).
 
      LLM=anthropic ANTHROPIC_API_KEY=… \\
-       clojure -M:dev:examples -e \"(require 'cf-worker-deploy-check) (cf-worker-deploy-check/-main)\"
+       kbb -M:dev:examples -e \"(require 'cf-worker-deploy-check) (cf-worker-deploy-check/-main)\"
 
   Env:
     CF_ACCOUNT_ID   Cloudflare account id   (default 4da88288dc30d9ee257f319d3c33ecf0)
