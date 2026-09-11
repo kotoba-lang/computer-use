@@ -22,7 +22,7 @@ src/computeruse/
   model_adapters.cljc  interpretation adapters (claude-cli / murakumo / openai-compat)
   json.cljc            dependency-free JSON, so the CLI runs under nbb
   hostfs.cljc          the filesystem seam
-bin/cua_bot_run.cljs   the resident CLI (nbb)
+bin/cua_bot_run.cljk   the resident CLI (nbb)
 resources/computeruse/backends.edn   the backend registry, with measured qualification
 ```
 
@@ -160,7 +160,7 @@ unbounded clicks by omission.
 ### The CLI
 
 ```sh
-nbb bin/cua_bot_run.cljs --roster <path.edn> --bot <bot-id> \
+nbb bin/cua_bot_run.cljk --roster <path.edn> --bot <bot-id> \
     --receipts-dir <dir> [--dry-run] [--adapter claude-cli|murakumo|openai-compat]
 ```
 
@@ -308,7 +308,7 @@ Datomic action log (which records only the ref).
 
 `computeruse.openai-model/openai-model` drives the agent with a LOCAL
 model instead of the Anthropic API — vision via image_url, tool-calling
-via OpenAI `tools`. `examples/jvm_host.clj` provides the JVM host caps
+via OpenAI `tools`. `examples/jvm_host.cljk` provides the JVM host caps
 (an :http-fn that shells out to `curl`, JSON via data.json).
 
 ```sh
@@ -334,24 +334,24 @@ blocks, System Events keys, cliclick mouse — `brew install cliclick`,
 grant Screen Recording + Accessibility). Coordinates are auto-scaled
 between the model-sized screenshot and display points.
 
-`examples/vultr_ip_allow.clj` uses it for a real ops task — adding an
+`examples/vultr_ip_allow.cljk` uses it for a real ops task — adding an
 IP to a Vultr API key's Access Control list in an already-signed-in
 browser session. Hard guardrails in the system prompt: the agent never
 types into credential fields and bails out (success=false) when a
 login/2FA page appears; it only ever adds the one requested entry.
 
-`examples/sumitclub_meisai.clj` is a read-only variant — fetching a
+`examples/sumitclub_meisai.cljk` is a read-only variant — fetching a
 card 利用明細 (statement) from sumitclub.jp. Login goes through
 `type_secret` (vault ref, never a raw credential), the system prompt
 forbids every state-changing control on the site, and the extracted
 rows are persisted via a custom `save_statement` tool as EDN, ready
 for downstream ingestion. It runs on a **local model by default**
 (Ollama serving gemma 4 QAT — tools + vision capable), so statement
-data never leaves the machine; `examples/jvm_host.clj` provides the
+data never leaves the machine; `examples/jvm_host.cljk` provides the
 JVM host capabilities and the `LLM=ollama|gemini|anthropic` switch
 (gemini = Gemini's OpenAI-compatible endpoint with `GEMINI_API_KEY`).
 
-`examples/ngc_free_org.clj` prepares the frontmost browser for a free
+`examples/ngc_free_org.cljk` prepares the frontmost browser for a free
 individual NVIDIA NGC organization registration:
 
 ```sh
@@ -417,14 +417,14 @@ It cannot do multitouch (one pointer), cannot be frame-accurate (the picture
 is a live video stream), and stops the moment someone picks the phone up.
 Turn-based and slow real-time games are the honest target.
 
-`examples/iphone_game_agent.clj` drives it as a game player:
+`examples/iphone_game_agent.cljk` drives it as a game player:
 
 ```sh
 clojure -M:dev:gemma -e "(require 'iphone-game-agent) (iphone-game-agent/-main \"Solitaire\")"
 ```
 
 The pure half — coordinate mapping, gesture paths, key scripts — is tested
-(`test/computeruse/ios_mirroring_test.cljc`, runs on cljs too). The shell-outs
+(`test/computeruse/ios_mirroring_test.cljk`, runs on cljs too). The shell-outs
 are not, and cannot be without a Mac, a paired iPhone and two granted
 permissions.
 
