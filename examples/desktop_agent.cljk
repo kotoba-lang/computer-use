@@ -1,7 +1,7 @@
 (ns desktop-agent
   "computer-use agent example. Runs offline with the mock model + virtual screen:
 
-     clojure -Sdeps '{:paths [\"src\" \"examples\"] :deps {io.github.com-junkawasaki/langgraph-clj {:git/tag \"v0.2.0\" :git/sha \"133740f\"}}}' \\
+     kbb -Sdeps '{:paths [\"src\" \"examples\"] :deps {io.github.com-junkawasaki/langgraph-clj {:git/tag \"v0.2.0\" :git/sha \"133740f\"}}}' \\
              -M -e \"(require 'desktop-agent) (desktop-agent/-main)\"
 
   For a real desktop, implement computeruse.computer/IComputer over

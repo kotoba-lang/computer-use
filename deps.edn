@@ -43,7 +43,7 @@
                         {:git/url "https://github.com/kotoba-lang/langchain.git"
          :git/sha "51e7b61ec3d55e917d5dc77dac145197cb3340df"}}}
   ;; drive a real desktop with a local/remote model (Ollama Gemma 4 E4B QAT
-  ;; by default). `clojure -M:gemma -m vultr-ip-allow 220.146.252.121 32`
+  ;; by default). `kbb -M:gemma -m vultr-ip-allow 220.146.252.121 32`
   :gemma {:extra-paths ["examples"]
           :extra-deps {org.clojure/data.json {:mvn/version "2.5.0"}}}
   ;; read-only statement examples (sumitclub_meisai); `-M:dev:examples`

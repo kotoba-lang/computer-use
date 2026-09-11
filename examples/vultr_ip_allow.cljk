@@ -2,7 +2,7 @@
   "Add an IP to a Vultr API key's Access Control list via computer use,
   with vault-backed login — the agent NEVER types a raw credential.
 
-     ANTHROPIC_API_KEY=… clojure -Sdeps '{:paths [\"src\" \"examples\"]
+     ANTHROPIC_API_KEY=… kbb -Sdeps '{:paths [\"src\" \"examples\"]
                   :deps {io.github.com-junkawasaki/langgraph-clj
                          {:git/tag \"v0.2.0\" :git/sha \"133740f\"}}}' \\
        -M -e \"(require 'vultr-ip-allow) (vultr-ip-allow/-main \\\"203.0.113.7\\\")\"

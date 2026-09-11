@@ -160,7 +160,7 @@ unbounded clicks by omission.
 ### The CLI
 
 ```sh
-nbb bin/cua_bot_run.cljk --roster <path.edn> --bot <bot-id> \
+kbb --backend sci bin/cua_bot_run.cljk --roster <path.edn> --bot <bot-id> \
     --receipts-dir <dir> [--dry-run] [--adapter claude-cli|murakumo|openai-compat]
 ```
 
@@ -175,7 +175,7 @@ Exit codes are three-valued and stay three-valued:
 **The nbb path is the one that was verified** (nbb v1.4.208; `nbb.edn`
 supplies the classpath, and no namespace the CLI reaches has a
 third-party dependency, so it runs from a bare checkout). The library
-also compiles and tests on the JVM (`clojure -M:test`), but there is no
+also compiles and tests on the JVM (`kbb -M:test`), but there is no
 JVM entry point for the CLI.
 
 Each session writes a receipt EDN — `{:bot-id :backend :frames
@@ -315,7 +315,7 @@ via OpenAI `tools`. `examples/jvm_host.cljk` provides the JVM host caps
 # Gemma 4 E4B QAT on Ollama, controlling this desktop:
 OPENAI_BASE_URL=http://127.0.0.1:11434/v1 OPENAI_MODEL=gemma4:e4b-it-qat \
 VAULT=op VULTR_VAULT_ITEM=Vultr \
-  clojure -M:gemma -m vultr-ip-allow 203.0.113.7 32
+  kbb -M:gemma -m vultr-ip-allow 203.0.113.7 32
 ```
 
 Notes from running Ollama 0.30.x: tool params of `type:"object"` must
@@ -355,7 +355,7 @@ JVM host capabilities and the `LLM=ollama|gemini|anthropic` switch
 individual NVIDIA NGC organization registration:
 
 ```sh
-clojure -M:dev:examples -m ngc-free-org
+kbb -M:dev:examples -m ngc-free-org
 ```
 
 The `computeruse.ngc/free-registration-system-prompt` is intended for an
@@ -365,16 +365,16 @@ shared `request_human_approval` tool. The macOS host presents this request as a
 native alert containing only the summary, action, and external impact:
 
 ```sh
-LLM=ollama clojure -M:examples -m ngc-free-org-agent
+LLM=ollama kbb -M:examples -m ngc-free-org-agent
 ```
 
 ```sh
 SUMITCLUB_VAULT_ITEM=sumitclub \
-  clojure -M:dev:examples -e "(require 'sumitclub-meisai) (sumitclub-meisai/-main)"
+  kbb -M:dev:examples -e "(require 'sumitclub-meisai) (sumitclub-meisai/-main)"
 ```
 
 ```sh
-ANTHROPIC_API_KEY=… clojure -Sdeps '{:paths ["src" "examples"]
+ANTHROPIC_API_KEY=… kbb -Sdeps '{:paths ["src" "examples"]
                  :deps {io.github.kotoba-lang/langgraph
                         {:git/sha "a332a770a0d2b5193f81b54483bb954fb29ef8d7"}}}' \
         -M -e "(require 'vultr-ip-allow) (vultr-ip-allow/-main \"203.0.113.7\")"
@@ -420,7 +420,7 @@ Turn-based and slow real-time games are the honest target.
 `examples/iphone_game_agent.cljk` drives it as a game player:
 
 ```sh
-clojure -M:dev:gemma -e "(require 'iphone-game-agent) (iphone-game-agent/-main \"Solitaire\")"
+kbb -M:dev:gemma -e "(require 'iphone-game-agent) (iphone-game-agent/-main \"Solitaire\")"
 ```
 
 The pure half — coordinate mapping, gesture paths, key scripts — is tested
@@ -431,12 +431,12 @@ permissions.
 ## Tests / example
 
 ```sh
-clojure -M:test     # 75 tests, 477 assertions
-clojure -M:lint     # clj-kondo, errors fail
-clojure -Sdeps '{:paths ["src" "examples"]
+kbb -M:test     # 75 tests, 477 assertions
+kbb -M:lint     # clj-kondo, errors fail
+kbb -Sdeps '{:paths ["src" "examples"]
                  :deps {io.github.kotoba-lang/langgraph
                         {:git/sha "a332a770a0d2b5193f81b54483bb954fb29ef8d7"}}}' \
         -M -e "(require 'desktop-agent) (desktop-agent/-main)"
 ```
 
-Workspace development against local checkouts: `clojure -M:dev:test`.
+Workspace development against local checkouts: `kbb -M:dev:test`.

@@ -4,7 +4,7 @@
   Requires a configured model host (for example a local Ollama endpoint). The
   agent shows a native alert only when terms or account creation are visible.
 
-    LLM=ollama clojure -M:examples -m ngc-free-org-agent"
+    LLM=ollama kbb -M:examples -m ngc-free-org-agent"
   (:require [computeruse.agent :as agent]
             [computeruse.macos :as macos]
             [computeruse.ngc :as ngc]

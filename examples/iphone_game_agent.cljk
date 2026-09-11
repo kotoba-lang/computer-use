@@ -1,7 +1,7 @@
 (ns iphone-game-agent
   "An LLM plays a game on a *physical* iPhone, seen through iPhone Mirroring.
 
-     clojure -M:dev:gemma -e \"(require 'iphone-game-agent) (iphone-game-agent/-main \\\"Solitaire\\\")\"
+     kbb -M:dev:gemma -e \"(require 'iphone-game-agent) (iphone-game-agent/-main \\\"Solitaire\\\")\"
 
   Prereqs, all of which fail loudly rather than quietly:
     • macOS 15+, iPhone Mirroring open and connected (phone locked, nearby)

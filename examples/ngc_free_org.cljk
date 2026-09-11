@@ -5,7 +5,7 @@
   enter credentials, complete email/MFA verification, review the terms, and
   create the account.
 
-    clojure -M:dev:examples -m ngc-free-org"
+    kbb -M:dev:examples -m ngc-free-org"
   (:require [computeruse.macos :as macos]
             [computeruse.ngc :as ngc]))
 
