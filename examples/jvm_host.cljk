@@ -48,7 +48,7 @@
 (defn make-model
   "ChatModel from env (LLM=ollama|gemini|anthropic|murakumo; default local
   Ollama). Reuses this host's curl :http-fn + data.json caps. Carried over
-  from reconcile PR #3 — also unblocks examples/epo_ops_register.clj,
+  from reconcile PR #3 — also unblocks examples/epo_ops_register.cljk,
   which already calls host/make-model.
 
   LLM=murakumo talks to gftdcojp/cloud-murakumo's self-hosted fleet via

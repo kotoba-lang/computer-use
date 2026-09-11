@@ -17,7 +17,7 @@
 
   This namespace deliberately implements no credential handling — an
   agent run on top of it must never type secrets (see
-  examples/vultr_ip_allow.clj for the guardrail prompt)."
+  examples/vultr_ip_allow.cljk for the guardrail prompt)."
   (:require [computeruse.computer :as c]
             [kotoba.lang.text :as str]
             [hil.core :as hil])
