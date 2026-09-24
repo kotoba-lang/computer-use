@@ -24,7 +24,7 @@
   apart from a crash, which is the failure mode this workspace calls
   out (ADR-2608136000): assert the reason."
   (:require [computeruse.hostfs :as fs]
-            [clojure.edn :as edn]
+            [kotoba.lang.edn :as edn]
             #?(:clj [clojure.java.io :as io])))
 
 ;; ───────────────────────── action vocabulary ─────────────────────────

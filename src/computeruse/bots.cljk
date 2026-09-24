@@ -22,7 +22,7 @@
             [computeruse.backends :as impl]
             [computeruse.computer :as c]
             [computeruse.hostfs :as fs]
-            [clojure.edn :as edn]
+            [kotoba.lang.edn :as edn]
             [kotoba.lang.text :as str]))
 
 ;; ───────────────────────── roster validation ─────────────────────────
