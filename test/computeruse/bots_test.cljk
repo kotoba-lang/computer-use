@@ -5,7 +5,7 @@
             [computeruse.backend :as b]
             [computeruse.bots :as bots]
             [computeruse.hostfs :as fs]
-            [clojure.edn :as edn]))
+            [kotoba.lang.edn :as edn]))
 
 (def known? #{:macos-local :window-scoped :host-object :fleet-node
               :agent-space :macos-vm :linux-container :cf-browser

@@ -12,7 +12,7 @@
   (:require [computeruse.backend :as b]
             [computeruse.hostfs :as fs]
             [kotoba.lang.text :as str]
-            [clojure.edn :as edn]))
+            [kotoba.lang.edn :as edn]))
 
 ;; ───────────────────────── host seams ─────────────────────────
 
