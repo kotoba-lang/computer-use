@@ -31,7 +31,7 @@
             [computeruse.agent :as agent]
             [jvm-host :as host]
             [langchain.db :as db]
-            [clojure.pprint :as pp]))
+            [kotoba.pprint :as pp]))
 
 (def meisai-url
   "https://www.sumitclub.jp/JPCRD/col/action/WA2020101Action/RWA2020105")

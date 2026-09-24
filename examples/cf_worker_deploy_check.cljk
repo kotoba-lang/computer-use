@@ -50,7 +50,7 @@
             [computeruse.agent :as agent]
             [jvm-host :as host]
             [langchain.db :as db]
-            [clojure.pprint :as pp]))
+            [kotoba.pprint :as pp]))
 
 (defn deployments-url [account worker]
   (str "https://dash.cloudflare.com/" account

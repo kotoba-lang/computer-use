@@ -12,7 +12,7 @@
   / :json-read are injected (no I/O in this namespace)."
   (:require [langchain.model :as model]
             [langchain.tool :as tool]
-            [clojure.set :as set]))
+            [kotoba.lang.coll :as set]))
 
 (defn- content->openai
   "langchain content (string, or a vector of Anthropic-style blocks) →
