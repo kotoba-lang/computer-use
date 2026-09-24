@@ -1,5 +1,5 @@
 (ns computeruse.ngc-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [kotoba.lang.text :as str]
             [computeruse.computer :as computer]
             [computeruse.ngc :as ngc]))

@@ -5,7 +5,7 @@
   something failed. A test that only checks for failure passes when the
   code fails for an entirely different reason — the known-bad pattern
   this workspace names (ADR-2608136000)."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [computeruse.backend :as b]
             [computeruse.backends :as impl]))
 
