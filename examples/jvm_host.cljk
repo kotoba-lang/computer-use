@@ -8,8 +8,8 @@
   \"model not found\" (byte-identical bodies succeed via curl, fail via
   java.net.http regardless of HTTP version / User-Agent / Accept — an
   Ollama request-framing quirk). curl is the reliable transport here."
-  (:require [kotoba.lang.text] [clojure.data.json :as json]
-            [clojure.java.io :as io]
+  (:require [kotoba.bytes :as kbytes] [kotoba.lang.text] [kotoba.json :as json]
+            [kotoba.io :as io]
             [langchain.model :as model]))
 
 (defn http-fn [{:keys [url method headers body]}]
@@ -27,7 +27,7 @@
         p (.start pb)]
     (when body
       (with-open [os (.getOutputStream p)]
-        (.write os (.getBytes ^String body "UTF-8"))))
+        (.write os (kbytes/utf8-bytes ^String body))))
     (let [out (slurp (.getInputStream p))
           _ (.waitFor p)
           idx (.lastIndexOf out "\n")
