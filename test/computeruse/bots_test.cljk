@@ -1,7 +1,7 @@
 (ns computeruse.bots-test
   "Tests for the resident bot layer: roster validation, the action gate,
   and the session loop. Negative tests pin the reason literal."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [computeruse.backend :as b]
             [computeruse.bots :as bots]
             [computeruse.hostfs :as fs]

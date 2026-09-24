@@ -5,7 +5,7 @@
    that lands somewhere plausible, a swipe that the phone reads as a tap. The
    shell-outs around them are not tested here and cannot be — they need a Mac,
    a paired iPhone, and two granted permissions."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [computeruse.ios-mirroring :as m]
             #?(:clj [computeruse.computer])))
 
