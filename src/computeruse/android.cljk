@@ -14,9 +14,9 @@
   Prereqs:
     • adb in PATH and device connected with USB debugging enabled
     • sips (macOS built-in) for PNG resizing"
-  (:require [computeruse.computer :as c]
+  (:require [kotoba.bytes :as kbytes] [computeruse.computer :as c]
             [kotoba.lang.text :as str])
-  #?(:clj (:import [java.util Arrays Base64]
+  #?(:clj (:import [java.util Arrays]
                    [java.io ByteArrayOutputStream]
                    [java.nio ByteBuffer]
                    [java.nio.file Files Paths OpenOption])))
@@ -38,7 +38,7 @@
 (defn- sh
   "Run command; return stdout as trimmed String."
   [args]
-  (str/trim (String. (sh-bytes args) "UTF-8")))
+  (str/trim (kbytes/utf8-string (sh-bytes args))))
 
 ;; ─── PNG helpers ─────────────────────────────────────────────────────────────
 
@@ -122,7 +122,7 @@
           [{:type "image"
             :source {:type       "base64"
                      :media_type "image/png"
-                     :data       (.encodeToString (Base64/getEncoder) resized)}}]))
+                     :data       (kbytes/base64-encode resized)}}]))
 
       (-key! [_ combo]
         (let [lower (str/lower combo)

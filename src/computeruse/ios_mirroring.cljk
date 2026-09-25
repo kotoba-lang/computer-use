@@ -55,7 +55,7 @@
 
   Everything above the `#?(:clj)` boundary is pure and runs on any host; only
   the shell-outs are JVM-only."
-  (:require [computeruse.computer :as c]
+  (:require [kotoba.bytes :as kbytes] [kotoba.io :as kio] [computeruse.computer :as c]
             [kotoba.lang.text :as str]
             #?(:clj [computeruse.macos :as macos])))
 
@@ -259,9 +259,9 @@
     (when (and w h) [w h])))
 
 (defn- b64-file [path]
-  (.encodeToString (java.util.Base64/getEncoder)
-                   (java.nio.file.Files/readAllBytes
-                    (java.nio.file.Paths/get path (make-array String 0)))))
+  (kbytes/base64-encode
+                   (kio/read-all-bytes
+                    path)))
 
 (defn iphone-mirroring-computer
   "IComputer over a physical iPhone via the macOS iPhone Mirroring window.

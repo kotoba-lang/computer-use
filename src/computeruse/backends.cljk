@@ -9,7 +9,7 @@
   (ProcessBuilder) and on nbb/Node (child_process.spawnSync) — the
   host-capability convention of this repo (openai_model's
   :http-fn/:json-read, macos.cljc's toolchain)."
-  (:require [computeruse.backend :as b]
+  (:require [kotoba.io :as kio] [computeruse.backend :as b]
             [computeruse.hostfs :as fs]
             [kotoba.lang.text :as str]
             [kotoba.lang.edn :as edn]))
@@ -32,7 +32,7 @@
      (fn sh [argv & [{:keys [in cwd timeout-ms]}]]
        (try
          (let [pb (ProcessBuilder. ^java.util.List (vec (map str argv)))
-               _ (when cwd (.directory pb (java.io.File. ^String (str cwd))))
+               _ (when cwd (.directory pb (kio/file ^String (str cwd))))
                p (.start pb)]
            (if in
              (with-open [w (java.io.OutputStreamWriter. (.getOutputStream p))]
@@ -86,8 +86,8 @@
     (if-not (zero? (:exit r))
       {:error (str "sips failed: " (str/trim (str (:err r))))}
       (try
-        (let [bytes #?(:clj (java.nio.file.Files/readAllBytes
-                             (java.nio.file.Paths/get ^String bmp (make-array String 0)))
+        (let [bytes #?(:clj (kio/read-all-bytes
+                             ^String bmp)
                        :cljs (.readFileSync (js/require "node:fs") bmp))
               size #?(:clj (alength ^bytes bytes) :cljs (.-length bytes))
               at (fn [i] (bit-and #?(:clj (aget ^bytes bytes i)
