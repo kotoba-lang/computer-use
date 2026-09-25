@@ -25,7 +25,7 @@
   out (ADR-2608136000): assert the reason."
   (:require [computeruse.hostfs :as fs]
             [kotoba.lang.edn :as edn]
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 ;; ───────────────────────── action vocabulary ─────────────────────────
 
